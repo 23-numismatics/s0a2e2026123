@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="S0A2E — audiovisual loop">
+  <title>S0A2E</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='black'/%3E%3Cpath d='M4 9h24v3H4zm5 6h19v3H9zM4 21h15v3H4z' fill='white'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      background: #000;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+
+    main {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100vh;
+      height: 100dvh;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background: #000;
+      isolation: isolate;
+    }
+
+    video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      background: #000;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sound-gate {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: grid;
+      place-items: center;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right)
+        env(safe-area-inset-bottom) env(safe-area-inset-left);
+      border: 0;
+      color: rgba(255, 255, 255, 0.88);
+      background: transparent;
+      font: inherit;
+      font-size: clamp(0.875rem, 3.8vw, 1rem);
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-indent: 0.22em;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 180ms linear;
+    }
+
+    .sound-gate span {
+      padding: 0.75rem 0.9rem 0.75rem 1.12rem;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.42);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7);
+    }
+
+    .sound-gate.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .sound-gate:focus-visible span {
+      outline: 2px solid #fff;
+      outline-offset: 5px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <video
+      id="loop"
+      src="loop.mp4"
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      disablepictureinpicture
+      controlslist="nodownload noplaybackrate nofullscreen"
+      aria-label="S0A2E audiovisual loop"
+    ></video>
+
+    <button id="soundGate" class="sound-gate" type="button" aria-label="Play video from the beginning with sound">
+      <span>TAP FOR SOUND</span>
+    </button>
+  </main>
+
+  <script>
+    const video = document.getElementById('loop');
+    const gate = document.getElementById('soundGate');
+
+    async function enterWithSound() {
+      video.currentTime = 0;
+      video.muted = false;
+      video.volume = 1;
+
+      try {
+        await video.play();
+        gate.classList.add('is-hidden');
+        gate.setAttribute('aria-hidden', 'true');
+      } catch {
+        video.muted = true;
+        gate.classList.remove('is-hidden');
+        gate.removeAttribute('aria-hidden');
+      }
+    }
+
+    function returnToMuted() {
+      video.muted = true;
+      gate.classList.remove('is-hidden');
+      gate.removeAttribute('aria-hidden');
+      gate.focus({ preventScroll: true });
+    }
+
+    gate.addEventListener('click', enterWithSound);
+
+    video.addEventListener('click', () => {
+      if (!video.muted) returnToMuted();
+    });
+
+    video.play().catch(() => {
+      gate.querySelector('span').textContent = 'TAP TO START';
+    });
+  </script>
+</body>
+</html>
